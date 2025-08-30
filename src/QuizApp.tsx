@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import MusicPlayer from "./components/MusicPlayer";
 
 type Question = {
   question: string;
@@ -2139,7 +2140,7 @@ const animeCategories: AnimeCategory[] = [
 
 // Image Display Component
 const AnimeImage = ({ src, alt, title, isLarge = false }: { src: string; alt: string; title: string; isLarge?: boolean }) => (
-  <div className={`${isLarge ? 'w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64' : 'w-32 h-32'} mx-auto mb-4 rounded-xl overflow-hidden border-2 border-gray-600 shadow-lg`}>
+  <div className={`${isLarge ? 'w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48' : 'w-24 h-24'} mx-auto mb-3 rounded-xl overflow-hidden border-2 border-gray-600 shadow-lg`}>
     <img 
       src={src} 
       alt={alt} 
@@ -2172,6 +2173,8 @@ export default function QuizApp() {
 
   const startGame = () => {
     setShowAnimeSelection(true);
+    // Start music when user goes to anime selection screen
+    window.dispatchEvent(new CustomEvent('new-quiz-started'));
   };
 
   const handleAnimeSelection = (animeTitle: string) => {
@@ -2221,6 +2224,8 @@ export default function QuizApp() {
     setShowResult(false);
     setShowAnimeSelection(false);
     setSelectedAnime([]);
+    // Stop music when game is reset
+    window.dispatchEvent(new CustomEvent('quiz-ended'));
   };
 
   const handleAnswer = (i: number) => {
@@ -2236,31 +2241,33 @@ export default function QuizApp() {
       setSelected(null);
     } else {
       setShowResult(true);
+      // Stop music when quiz ends
+      window.dispatchEvent(new CustomEvent('quiz-ended'));
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-black text-white">
       {/* Header Image */}
-      <div className="flex justify-center pt-8 pb-6">
+      <div className="flex justify-center pt-6 pb-4">
         <img 
           src="/play-no-bg.png" 
           alt="Anime Quiz Header" 
-          className="h-48 md:h-56 lg:h-64 w-auto"
+          className="h-32 md:h-40 lg:h-48 w-auto"
         />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-4xl text-center">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-5xl text-center">
           {!roundQuestions.length && !showAnimeSelection && (
             <div>
-              <h1 className="text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+              <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
                 Anime Quiz
               </h1>
-              <p className="text-xl text-gray-300 mb-8">Test your knowledge across multiple anime series!</p>
+              <p className="text-base text-gray-300 mb-4">Test your knowledge across multiple anime series!</p>
               <button
                 onClick={startGame}
-                className="px-8 py-4 text-3xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="px-6 py-3 text-2xl rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
               >
                 Start Quiz
               </button>
@@ -2269,45 +2276,45 @@ export default function QuizApp() {
 
           {showAnimeSelection && (
             <div>
-              <h1 className="text-5xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+              <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
                 Select 3 Anime Shows
               </h1>
-              <p className="text-xl text-gray-300 mb-8">Choose 3 anime shows you want to be quizzed on!</p>
+              <p className="text-base text-gray-300 mb-4">Choose 3 anime shows you want to be quizzed on!</p>
               
-                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-                 {animeCategories.map((category) => (
-                   <button
-                     key={category.title}
-                     onClick={() => handleAnimeSelection(category.title)}
-                     className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                       selectedAnime.includes(category.title)
-                         ? 'bg-gradient-to-r from-green-600 to-green-500 border-green-400 scale-105 shadow-lg'
-                         : 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600 hover:from-gray-700 hover:to-gray-600 hover:border-gray-500 hover:scale-105'
-                     }`}
-                   >
-                     <div className="w-20 h-20 mx-auto mb-3 rounded-lg overflow-hidden border border-gray-500">
-                       <img 
-                         src={category.imagePlaceholder} 
-                         alt={category.title} 
-                         className="w-full h-full object-cover"
-                         onError={(e) => {
-                           const target = e.target as HTMLImageElement;
-                           target.style.display = 'none';
-                           target.nextElementSibling?.classList.remove('hidden');
-                         }}
-                       />
-                       <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-gray-300 text-xs text-center p-1 hidden">
-                         <div className="text-lg">🎬</div>
-                       </div>
-                     </div>
-                     <div className="text-lg font-semibold">{category.title}</div>
-                     <div className="text-sm text-gray-400 mt-1">{category.questions.length} questions</div>
-                   </button>
-                 ))}
-               </div>
+              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 mb-4">
+                {animeCategories.map((category) => (
+                  <button
+                    key={category.title}
+                    onClick={() => handleAnimeSelection(category.title)}
+                    className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                      selectedAnime.includes(category.title)
+                        ? 'bg-gradient-to-r from-green-600 to-green-500 border-green-400 scale-105 shadow-lg'
+                        : 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600 hover:from-gray-700 hover:to-gray-600 hover:border-gray-500 hover:scale-105'
+                    }`}
+                  >
+                    <div className="w-16 h-16 mx-auto mb-2 rounded-lg overflow-hidden border border-gray-500">
+                      <img 
+                        src={category.imagePlaceholder} 
+                        alt={category.title} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-gray-300 text-xs text-center p-1 hidden">
+                        <div className="text-lg">🎬</div>
+                      </div>
+                    </div>
+                    <div className="text-xs font-semibold">{category.title}</div>
+                    <div className="text-xs text-gray-400 mt-1">{category.questions.length} q</div>
+                  </button>
+                ))}
+              </div>
 
-              <div className="mb-8">
-                <p className="text-xl text-gray-300 mb-4">
+              <div className="mb-4">
+                <p className="text-base text-gray-300 mb-3">
                   Selected: <span className="text-green-400 font-bold">{selectedAnime.length}/3</span>
                 </p>
                 {selectedAnime.length > 0 && (
@@ -2315,7 +2322,7 @@ export default function QuizApp() {
                     {selectedAnime.map((anime) => (
                       <span
                         key={anime}
-                        className="px-3 py-1 bg-green-600 text-white rounded-full text-sm"
+                        className="px-2 py-1 bg-green-600 text-white rounded-full text-xs"
                       >
                         {anime}
                       </span>
@@ -2324,17 +2331,17 @@ export default function QuizApp() {
                 )}
               </div>
 
-              <div className="flex gap-4 justify-center">
+              <div className="flex gap-2 justify-center">
                 <button
                   onClick={resetGame}
-                  className="px-6 py-3 text-xl bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="px-4 py-2 text-base rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600"
                 >
                   Back
                 </button>
                 <button
                   onClick={confirmAnimeSelection}
                   disabled={selectedAnime.length !== 3}
-                  className={`px-8 py-3 text-2xl rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                  className={`px-5 py-2 text-lg rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg ${
                     selectedAnime.length === 3
                       ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600'
                       : 'bg-gradient-to-r from-gray-600 to-gray-500 cursor-not-allowed'
@@ -2348,32 +2355,32 @@ export default function QuizApp() {
 
           {roundQuestions.length > 0 && !showResult && (
             <div>
-                             {/* Anime Category Header */}
-               <div className="mb-8">
-                 <AnimeImage 
-                   src={animeCategories.find(cat => cat.title === roundCategories[currentIndex])?.imagePlaceholder || ''} 
-                   alt={roundCategories[currentIndex]} 
-                   title={roundCategories[currentIndex]} 
-                   isLarge={true}
-                 />
-                 <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500 mb-2">
-                   {roundCategories[currentIndex]}
-                 </h2>
-                 <p className="text-gray-400">Question {currentIndex + 1} of {roundQuestions.length}</p>
-               </div>
+              {/* Anime Category Header */}
+              <div className="mb-4">
+                <AnimeImage 
+                  src={animeCategories.find(cat => cat.title === roundCategories[currentIndex])?.imagePlaceholder || ''} 
+                  alt={roundCategories[currentIndex]} 
+                  title={roundCategories[currentIndex]} 
+                  isLarge={true}
+                />
+                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500 mb-2">
+                  {roundCategories[currentIndex]}
+                </h2>
+                <p className="text-gray-400 text-xs">Question {currentIndex + 1} of {roundQuestions.length}</p>
+              </div>
 
               {/* Question */}
-              <h1 className="text-4xl font-bold mb-8 text-gray-100">
+              <h1 className="text-2xl font-bold mb-4 text-gray-100">
                 {roundQuestions[currentIndex].question}
               </h1>
 
               {/* Answer Options */}
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 {roundQuestions[currentIndex].options.map((opt, i) => (
                   <button
                     key={i}
                     onClick={() => handleAnswer(i)}
-                    className={`p-6 text-2xl rounded-2xl border-4 transition-all duration-200
+                    className={`p-3 text-lg rounded-xl border-2 transition-all duration-200
                       ${
                         selected === null
                           ? "bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 border-gray-600 hover:scale-105 hover:border-gray-500"
@@ -2394,7 +2401,7 @@ export default function QuizApp() {
               {selected !== null && (
                 <button
                   onClick={nextQuestion}
-                  className="mt-8 px-6 py-3 text-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="mt-4 px-4 py-2 text-lg rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600"
                 >
                   {currentIndex + 1 < roundQuestions.length ? "Next →" : "Finish"}
                 </button>
@@ -2404,30 +2411,33 @@ export default function QuizApp() {
 
           {showResult && (
             <div>
-              <h1 className="text-5xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+              <h1 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
                 Quiz Complete!
               </h1>
-              <div className="text-6xl font-bold mb-8">
+              <div className="text-4xl font-bold mb-4">
                 Score: <span className="text-green-400">{score}</span>/<span className="text-blue-400">3</span>
               </div>
-              <div className="text-xl text-gray-300 mb-8">
+              <div className="text-base text-gray-300 mb-4">
                 {score === 3 && "Perfect! You're an anime expert! 🎉"}
                 {score === 2 && "Great job! You know your anime! 👍"}
                 {score === 1 && "Not bad! Keep learning! 📚"}
                 {score === 0 && "Keep watching anime to improve! 🍿"}
               </div>
-                             <div className="flex justify-center">
-                 <button
-                   onClick={resetGame}
-                   className="px-8 py-4 text-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-                 >
-                   New Quiz
-                 </button>
-               </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={resetGame}
+                  className="px-5 py-2 text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                >
+                  New Quiz
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
+      
+      {/* Music Player */}
+      <MusicPlayer />
     </div>
   );
 }
